@@ -1,3 +1,41 @@
+
+using System;
+using Godot;
+
+namespace UniDi
+{
+    public class UniDiSceneLoader
+    {
+        //readonly ProjectKernel _projectKernel;
+        readonly ContextNode _sceneRoot;
+
+        public UniDiSceneLoader(
+            [Inject]
+            ContextNode sceneRoot)
+//            ProjectKernel projectKernel)
+        {
+            /*_projectKernel = projectKernel;*/
+
+            _sceneRoot = sceneRoot;
+
+        }
+
+        public void LoadScene(
+            Node root,
+            string sceneFile,
+            Action<DiContainer> extraBindings = null,
+            Action<DiContainer> extraBindingsLate = null)
+        {
+            //var baseNode = _sceneContainer.ContextNode;
+            var resource = ResourceLoader.Load<PackedScene>(sceneFile);
+            var sceneNode = (SceneContextNode) resource.Instantiate();
+            sceneNode._parentContainer = _sceneRoot.Container;
+            _sceneRoot.AddChild(sceneNode);
+            //baseNode.CallDeferred("add_child", sceneNode);
+        }
+    }
+}
+
 #if !NOT_UNITY3D
 
 using System;

@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DevLabs.Collections;
+using Godot;
 using UniDi.Internal;
 using UniDi.Internal.Util;
 #if !NOT_UNITY3D
@@ -36,6 +38,14 @@ namespace UniDi
         readonly HashSet<Type> _validatedTypes = new HashSet<Type>();
         readonly List<IValidatable> _validationQueue = new List<IValidatable>();
 
+#if GODOT
+        Node _contextNode;
+        bool _hasLookedUpContextNode;
+#endif
+        public override string ToString()
+        {
+            return $"DiContainer({_contextNode?.Name})";
+        }
 #if !NOT_UNITY3D
         Transform _contextTransform;
         bool _hasLookedUpContextTransform;
@@ -221,6 +231,28 @@ namespace UniDi
 
             return false;
         }
+
+#if GODOT
+        Node ContextNode
+        {
+            get
+            {
+                if (!_hasLookedUpContextNode)
+                {
+                    _hasLookedUpContextNode = true;
+
+                    var context = TryResolve<ContextNode>();
+
+                    if (context != null)
+                    {
+                        _contextNode = context;
+                    }
+                }
+
+                return _contextNode;
+            }
+        }
+#endif
 
 #if !NOT_UNITY3D
         // This might be null in some rare cases like when used in UniDiUnitTestFixture
@@ -1888,6 +1920,101 @@ namespace UniDi
 
 #endif
 
+#if GODOT
+        public Node CreateNodeOfType(NodeCreationParameters nodeBindInfo, Type nodeType, InjectContext context)
+        {
+            Assert.That(!AssertOnNewGameObjects, // TODO: check what goes here
+                "Given DiContainer does not support creating new game objects");
+
+            FlushBindings();
+
+            var node = (Node) Activator.CreateInstance(nodeType);
+            node.Name = nodeBindInfo.Name;
+            var parent = GetNodeGroup(nodeBindInfo, context);
+
+            if (parent == null)
+            {
+                ContextNode.AddChild(node);
+                if (nodeBindInfo.Order == NodeCreationParameters.NodeOrder.First)
+                    ContextNode.MoveChild(node, 0);
+                //ContextNode.CallDeferred("add_child", node);
+            }
+            else
+            {
+                parent.AddChild(node);
+            }
+
+            return node;
+        }
+
+        Node GetNodeGroup(NodeCreationParameters gameObjectBindInfo, InjectContext context)
+        {
+            Assert.That(!AssertOnNewGameObjects,
+                "Given DiContainer does not support creating new game objects");
+
+            if (gameObjectBindInfo.ParentNode != null)
+            {
+                Assert.IsNull(gameObjectBindInfo.GroupName);
+                Assert.IsNull(gameObjectBindInfo.ParentNodeGetter);
+
+                return gameObjectBindInfo.ParentNode;
+            }
+
+            return null;
+
+            // // Don't execute the ParentTransformGetter method during validation
+            // // since it might do a resolve etc.
+            // if (gameObjectBindInfo.ParentTransformGetter != null && !IsValidating)
+            // {
+            //     Assert.IsNull(gameObjectBindInfo.GroupName);
+            //
+            //     if (context == null)
+            //     {
+            //         context = new InjectContext
+            //         {
+            //             // This is the only information we can supply in this case
+            //             Container = this
+            //         };
+            //     }
+            //
+            //     // NOTE: Null is fine here, will just be a root game object in that case
+            //     return gameObjectBindInfo.ParentTransformGetter(context);
+            // }
+            //
+            // var groupName = gameObjectBindInfo.GroupName;
+            //
+            // // Only use the inherited parent if is not set locally
+            // var defaultParent = _hasExplicitDefaultParent ? _explicitDefaultParent : _inheritedDefaultParent;
+            //
+            // if (defaultParent == null)
+            // {
+            //     if (groupName == null)
+            //     {
+            //         return null;
+            //     }
+            //
+            //     return (GameObject.Find("/" + groupName) ?? CreateTransformGroup(groupName)).transform;
+            // }
+            //
+            // if (groupName == null)
+            // {
+            //     return defaultParent;
+            // }
+            //
+            // foreach (Transform child in defaultParent)
+            // {
+            //     if (child.name == groupName)
+            //     {
+            //         return child;
+            //     }
+            // }
+            //
+            // var group = new GameObject(groupName).transform;
+            // group.SetParent(defaultParent, false);
+            // return group;
+        }
+#endif
+
         // Use this method to create any non-monobehaviour
         // Any fields marked [Inject] will be set using the bindings on the container
         // Any methods marked with a [Inject] will be called
@@ -1928,6 +2055,46 @@ namespace UniDi
             return InstantiateExplicit(
                 concreteType, InjectUtil.CreateArgList(extraArgs));
         }
+
+#if GODOT
+        public TContract InstantiateNode<TContract>(IEnumerable<object> extraArgs)
+            where TContract : Node
+        {
+            return (TContract)InstantiateNodeExplicit(typeof(TContract), InjectUtil.CreateArgList(extraArgs));
+        }
+
+        public T InstantiateNode<T>()
+            where T : Node
+        {
+            return InstantiateNode<T>(typeof(T).Name);
+        }
+
+        public T InstantiateNode<T>(string nodeName)
+            where T : Node
+        {
+            return InstantiateNode<T>(nodeName, new object[0]);
+        }
+
+        public T InstantiateNode<T>(
+            string nodeName, IEnumerable<object> extraArgs)
+            where T : Node
+        {
+            var node = InstantiateNode<T>(extraArgs);
+            node.Name = nodeName;
+            return node;
+        }
+
+        public Node InstantiateNodeExplicit(Type nodeType, List<TypeValuePair> extraArgs)
+        {
+            Assert.That(nodeType.DerivesFrom<Node>());
+
+            FlushBindings();
+
+            var node = (Node) Activator.CreateInstance(nodeType);
+            InjectExplicit(node, extraArgs);
+            return node;
+        }
+#endif
 
 #if !NOT_UNITY3D
         // Add new component to existing game object and fill in its dependencies

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 using UniDi.Internal;
 using UniDi.Internal.Util;
 
@@ -13,6 +14,11 @@ namespace UniDi
         List<InitializableInfo> _initializables;
 
         protected bool _hasInitialized;
+
+        public bool HasInitialized
+        {
+            get { return _hasInitialized; }
+        }
 
         [Inject]
         public InitializableManager(

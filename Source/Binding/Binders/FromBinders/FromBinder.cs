@@ -171,6 +171,30 @@ namespace UniDi
             return binder;
         }
 
+        public NameNodeScopeConcreteIdArgConditionCopyNonLazyBinder OnNewNode()
+        {
+            return OnNewNode(new NodeCreationParameters());
+        }
+
+        internal NameNodeScopeConcreteIdArgConditionCopyNonLazyBinder OnNewNode(
+            NodeCreationParameters nodeInfo)
+        {
+            // TODO: check if node type?
+            //BindingUtil.AssertIsComponent(ConcreteTypes);
+            BindingUtil.AssertTypesAreNotAbstract(ConcreteTypes);
+
+            BindInfo.RequireExplicitScope = true;
+            SubFinalizer = new ScopableBindingFinalizer(
+                BindInfo,
+                (container, type) => new AddNewNodeProvider(
+                    container,
+                    type,
+                    BindInfo.Arguments,
+                    nodeInfo, BindInfo.ConcreteIdentifier, BindInfo.InstantiatedCallback));
+
+            return new NameNodeScopeConcreteIdArgConditionCopyNonLazyBinder(BindInfo, nodeInfo);
+        }
+
 #if !NOT_UNITY3D
 
         public ScopeConcreteIdArgConditionCopyNonLazyBinder FromComponentsOn(GameObject gameObject)
