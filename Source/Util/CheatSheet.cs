@@ -1,3 +1,4 @@
+#if !NOT_UNITY3D
 using System.Linq;
 
 using UniDi.Internal;
@@ -437,3 +438,4 @@ namespace UniDi
         }
     }
 }
+#endif

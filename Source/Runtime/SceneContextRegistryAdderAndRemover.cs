@@ -1,3 +1,4 @@
+#if !NOT_UNITY3D
 using System;
 
 namespace UniDi
@@ -27,4 +28,5 @@ namespace UniDi
         }
     }
 }
+#endif
 

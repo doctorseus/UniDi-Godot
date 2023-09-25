@@ -1,3 +1,4 @@
+#if !NOT_UNITY3D
 using System.Collections.Generic;
 using UniDi.Internal;
 using UnityEngine.SceneManagement;
@@ -97,3 +98,4 @@ namespace UniDi
     }
 
 }
+#endif

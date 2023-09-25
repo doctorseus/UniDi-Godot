@@ -1,4 +1,4 @@
-
+#if !NOT_UNITY3D
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -47,3 +47,4 @@ namespace UniDi.Internal
         }
     }
 }
+#endif
