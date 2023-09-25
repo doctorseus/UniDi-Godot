@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 using UniDi.Internal;
 using UniDi.Internal.Util;
 #if !NOT_UNITY3D
@@ -35,6 +36,11 @@ namespace UniDi
 
         readonly HashSet<Type> _validatedTypes = new HashSet<Type>();
         readonly List<IValidatable> _validationQueue = new List<IValidatable>();
+
+#if GODOT
+        Node _contextNode;
+        bool _hasLookedUpContextNode;
+#endif
 
 #if !NOT_UNITY3D
         Transform _contextTransform;
@@ -221,6 +227,28 @@ namespace UniDi
 
             return false;
         }
+
+#if GODOT
+        Node ContextNode
+        {
+            get
+            {
+                if (!_hasLookedUpContextNode)
+                {
+                    _hasLookedUpContextNode = true;
+
+                    var context = TryResolve<NodeContextBase>(); // TODO: should be context (inherit?)
+
+                    if (context != null)
+                    {
+                        _contextNode = context;
+                    }
+                }
+
+                return _contextNode;
+            }
+        }
+#endif
 
 #if !NOT_UNITY3D
         // This might be null in some rare cases like when used in UniDiUnitTestFixture
@@ -459,6 +487,7 @@ namespace UniDi
 
         public void QueueForInject(object instance)
         {
+            GD.Print($"Inject ({instance}) [{((Node)instance).Name}]");
             _lazyInjector.AddInstance(instance);
         }
 
@@ -1886,6 +1915,98 @@ namespace UniDi
             return gameObj;
         }
 
+#endif
+
+#if GODOT
+        public Node CreateEmptyNodeOfType(NodeCreationParameters nodeBindInfo, Type nodeType, InjectContext context)
+        {
+            Assert.That(!AssertOnNewGameObjects, // TODO: check what goes here
+                "Given DiContainer does not support creating new game objects");
+
+            FlushBindings();
+
+            var node = (Node) Activator.CreateInstance(nodeType);
+            node.Name = nodeBindInfo.Name;
+            var parent = GetNodeGroup(nodeBindInfo, context);
+
+            if (parent == null)
+            {
+                ContextNode.AddChild(node);
+            }
+            else
+            {
+                parent.AddChild(node);
+            }
+
+            return node;
+        }
+
+        Node GetNodeGroup(NodeCreationParameters gameObjectBindInfo, InjectContext context)
+        {
+            Assert.That(!AssertOnNewGameObjects,
+                "Given DiContainer does not support creating new game objects");
+
+            if (gameObjectBindInfo.ParentNode != null)
+            {
+                Assert.IsNull(gameObjectBindInfo.GroupName);
+                Assert.IsNull(gameObjectBindInfo.ParentNodeGetter);
+
+                return gameObjectBindInfo.ParentNode;
+            }
+
+            return null;
+
+            // // Don't execute the ParentTransformGetter method during validation
+            // // since it might do a resolve etc.
+            // if (gameObjectBindInfo.ParentTransformGetter != null && !IsValidating)
+            // {
+            //     Assert.IsNull(gameObjectBindInfo.GroupName);
+            //
+            //     if (context == null)
+            //     {
+            //         context = new InjectContext
+            //         {
+            //             // This is the only information we can supply in this case
+            //             Container = this
+            //         };
+            //     }
+            //
+            //     // NOTE: Null is fine here, will just be a root game object in that case
+            //     return gameObjectBindInfo.ParentTransformGetter(context);
+            // }
+            //
+            // var groupName = gameObjectBindInfo.GroupName;
+            //
+            // // Only use the inherited parent if is not set locally
+            // var defaultParent = _hasExplicitDefaultParent ? _explicitDefaultParent : _inheritedDefaultParent;
+            //
+            // if (defaultParent == null)
+            // {
+            //     if (groupName == null)
+            //     {
+            //         return null;
+            //     }
+            //
+            //     return (GameObject.Find("/" + groupName) ?? CreateTransformGroup(groupName)).transform;
+            // }
+            //
+            // if (groupName == null)
+            // {
+            //     return defaultParent;
+            // }
+            //
+            // foreach (Transform child in defaultParent)
+            // {
+            //     if (child.name == groupName)
+            //     {
+            //         return child;
+            //     }
+            // }
+            //
+            // var group = new GameObject(groupName).transform;
+            // group.SetParent(defaultParent, false);
+            // return group;
+        }
 #endif
 
         // Use this method to create any non-monobehaviour

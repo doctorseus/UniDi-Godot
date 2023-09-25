@@ -105,6 +105,21 @@ namespace UniDi
             return BindContainer.BindNoFlush<T>().WithId(factoryId);
         }
 
+        public NameNodeScopeConcreteIdArgConditionCopyNonLazyBinder FromNewNode()
+        {
+            //BindingUtil.AssertIsComponent(ContractType);
+            BindingUtil.AssertIsNotAbstract(ContractType);
+
+            var nodeInfo = new NodeCreationParameters();
+
+            ProviderFunc =
+                (container) => new AddNewNodeProvider(
+                    container, ContractType,
+                    BindInfo.Arguments, nodeInfo, BindInfo.ConcreteIdentifier, BindInfo.InstantiatedCallback);
+
+            return new NameNodeScopeConcreteIdArgConditionCopyNonLazyBinder(BindInfo, nodeInfo);
+        }
+
 #if !NOT_UNITY3D
 
         public ConditionCopyNonLazyBinder FromComponentOn(GameObject gameObject)
