@@ -1,3 +1,4 @@
+#if !NOT_UNITY3D
 using UnityEngine;
 
 namespace UniDi
@@ -370,3 +371,4 @@ namespace UniDi
         }
     }
 }
+#endif

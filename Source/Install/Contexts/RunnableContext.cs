@@ -1,8 +1,7 @@
+#if !NOT_UNITY3D
 
 using UniDi.Internal;
 using UnityEngine;
-
-#if !NOT_UNITY3D
 
 namespace UniDi
 {
