@@ -5,22 +5,22 @@ using UniDi.Internal;
 #if GODOT
 namespace UniDi;
 
-public partial class AutoloadContext : NodeContextBase
+public partial class ProjectContextNode : ContextNode
 {
-    static AutoloadContext _instance;
+    static ProjectContextNode _instance;
 
     public static bool HasInstance
     {
         get { return _instance != null; }
     }
 
-    public static AutoloadContext Instance
+    public static ProjectContextNode Instance
     {
         get
         {
             if (_instance == null)
             {
-                Assert.IsNotNull(_instance);
+                Assert.IsNotNull(_instance, "AutoloadContext not found! You need to add an AutoloadContext node to the project.");
             }
 
             return _instance;
@@ -36,6 +36,7 @@ public partial class AutoloadContext : NodeContextBase
     public override void _Ready()
     {
         GD.Print("AutoloadContext > _Ready");
+        base._Ready();
     }
 
     private void SetSingletonAndInitialize()
@@ -55,6 +56,7 @@ public partial class AutoloadContext : NodeContextBase
         // TODO: this is done by project context normally (we need some toplevel context)
         // InitializableManager, TickableManager, DisposableManager
         GD.Print($"Container={Container}");
+
         UniDiManagersInstaller.Install(Container);
     }
 

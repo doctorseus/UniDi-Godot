@@ -8,7 +8,7 @@ namespace UniDi
     // We'd prefer to make this abstract but Unity 5.3.5 has a bug where references
     // can get lost during compile errors for classes that are abstract
     [DebuggerStepThrough]
-    public partial class NodeInstallerBase : Node, IInstaller
+    public abstract partial class InstallerNodeBase : Node, IInstaller
     {
         [Inject]
         protected DiContainer Container

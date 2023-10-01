@@ -1,3 +1,50 @@
+
+using System;
+using Godot;
+
+namespace UniDi
+{
+    public class UniDiSceneLoader
+    {
+        //readonly ProjectKernel _projectKernel;
+        readonly DiContainer _sceneContainer;
+
+        public UniDiSceneLoader(
+            [Inject]
+            ContextNode sceneRoot)
+//            ProjectKernel projectKernel)
+        {
+            /*_projectKernel = projectKernel;*/
+            GD.Print("###### UniDiSceneLoader> " + sceneRoot.Name);
+            _sceneContainer = sceneRoot.Container;
+
+        }
+
+        public void LoadScene(
+            Node root,
+            string sceneFile,
+            Action<DiContainer> extraBindings = null,
+            Action<DiContainer> extraBindingsLate = null)
+        {
+            var baseNode = _sceneContainer.ContextNode;
+            var resource = ResourceLoader.Load<PackedScene>(sceneFile);
+            var sceneNode = (SceneContextNode) resource.Instantiate();
+            sceneNode._parentContainer = _sceneContainer;
+            baseNode.AddChild(sceneNode);
+            //baseNode.CallDeferred("add_child", sceneNode);
+
+            GD.Print($"UniDiSceneLoader > baseNode = {baseNode}");
+            GD.Print($"UniDiSceneLoader > resource = {resource}");
+            GD.Print($"UniDiSceneLoader > sceneNode = {sceneNode}");
+
+            GD.Print($"UniDiSceneLoader > ResourceLoader.ResourceName = {resource.ResourceName}");
+            GD.Print($"UniDiSceneLoader > ResourceLoader.ResourcePath = {resource.ResourcePath}");
+            GD.Print($"UniDiSceneLoader > ResourceLoader.ResourceLocalToScene = {resource.ResourceLocalToScene}");
+
+        }
+    }
+}
+
 #if !NOT_UNITY3D
 
 using System;

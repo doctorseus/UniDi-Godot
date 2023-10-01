@@ -5,7 +5,7 @@ using UniDi.Internal;
 
 namespace UniDi
 {
-    public partial class NodeKernel : Node
+    public partial class KernelNode : Node
     {
         [InjectLocal]
         TickableManager _tickableManager = null;
@@ -28,6 +28,9 @@ namespace UniDi
         }
 
         public override void _Ready()
+        { } // we fire initialize from root node otherwise no nodes can be added to it (as it is data blocked)
+
+        internal void RunInitialize()
         {
             if (decoratableNodeKernel?.ShouldInitializeOnStart()??true)
             {
@@ -37,6 +40,7 @@ namespace UniDi
 
         public void Initialize()
         {
+            GD.Print(">>>> Initialize " + GetParent().Name);
             // We don't put this in start in case Start is overridden
             if (!_hasInitialized)
             {
@@ -48,6 +52,7 @@ namespace UniDi
                 }
                 else
                 {
+                    GD.Print(">>>> _initializableManager.Initialize()");
                     _initializableManager.Initialize();
                 }
             }

@@ -9,9 +9,9 @@ namespace UniDi
 {
     public partial class NodeContextOld : Node
     {
-        [Export] public NodeInstaller Installer;
+        [Export] public InstallerNode Installer;
 
-        NodeKernel _kernel;
+        KernelNode _kernel;
 
         DiContainer _container;
 
@@ -142,7 +142,7 @@ namespace UniDi
             // IInitializable.Initialize during Start()
             if (/*gameObject.scene.isLoaded &&*/ !_container.IsValidating)
             {
-                _kernel = _container.Resolve<NodeKernel>();
+                _kernel = _container.Resolve<KernelNode>();
                 _kernel.Initialize();
                 GD.Print("> NodeKernel>Initialize()");
             }
@@ -165,14 +165,14 @@ namespace UniDi
             GD.Print("> InstallBindings 2");
             if (_kernel == null)
             {            GD.Print("> InstallBindings 31");
-                _container.Bind<NodeKernel>()
-                    .To<DefaultNodeKernel>().OnNewNode().AsSingle().NonLazy();
+                _container.Bind<KernelNode>()
+                    .To<DefaultKernelNode>().OnNewNode().AsSingle().NonLazy();
                 GD.Print("> InstallBindings 32");
             }
             else
             {
                 GD.Print("> InstallBindings 41");
-                _container.Bind<NodeKernel>().FromInstance(_kernel).AsSingle().NonLazy();
+                _container.Bind<KernelNode>().FromInstance(_kernel).AsSingle().NonLazy();
                 GD.Print("> InstallBindings 42");
             }
             GD.Print("> InstallBindings 5");
@@ -185,7 +185,7 @@ namespace UniDi
         {
             if (Installer == null) return;
 
-            Assert.DerivesFrom<NodeInstallerBase>(Installer.GetType());
+            Assert.DerivesFrom<InstallerNodeBase>(Installer.GetType());
             _container.Inject(Installer);
             Installer.InstallBindings();
         }
@@ -223,7 +223,7 @@ namespace UniDi
                 return;
             }
 
-            if (node.GetType().DerivesFromOrEqual<NodeContext>())
+            if (node.GetType().DerivesFromOrEqual<SceneContextNode>())
             {
                 // TODO: This is now the same but for NodeContext... fix this
                 // Need to make sure we don't inject on any MonoBehaviour's that are below a GameObjectContext

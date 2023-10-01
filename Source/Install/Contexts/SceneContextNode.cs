@@ -1,18 +1,17 @@
 ﻿#if GODOT
 
-using System;
 using System.Collections.Generic;
 using Godot;
 using UniDi.Internal;
 
 namespace UniDi
 {
-    public partial class NodeContext : NodeContextBase
+    public partial class SceneContextNode : ContextNode
     {
 
         public override void _EnterTree()
         {
-            GD.Print("NodeContext > _EnterTree");
+            GD.Print($"NodeContext > _EnterTree ({Name})");
 
             RunInternal();
         }
@@ -20,6 +19,7 @@ namespace UniDi
         public override void _Ready()
         {
             GD.Print("NodeContext > _Ready");
+            base._Ready();
         }
 
         protected override IEnumerable<DiContainer> GetParentContainers()
@@ -29,9 +29,9 @@ namespace UniDi
                 // Check if we have an AutoloadContext instance available
                 // otherwise we use the StaticContext as parent (if no parent is given).
 
-                if (AutoloadContext.Instance != null)
+                if (ProjectContextNode.Instance != null)
                 {
-                    return new[] { AutoloadContext.Instance.Container };
+                    return new[] { ProjectContextNode.Instance.Container };
                 }
                 else
                 {
@@ -77,8 +77,9 @@ namespace UniDi
             {
                 return;
             }
+            GD.Print($"##> Add for injection {node.Name}[{node.GetType()}]");
 
-            if (node.GetType().DerivesFromOrEqual<NodeContext>())
+            if (node.GetType().DerivesFromOrEqual<SceneContextNode>())
             {
                 // TODO: This is now the same but for NodeContext... fix this
                 // Need to make sure we don't inject on any MonoBehaviour's that are below a GameObjectContext

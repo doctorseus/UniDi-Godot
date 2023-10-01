@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DevLabs.Collections;
 using Godot;
 using UniDi.Internal;
 using UniDi.Internal.Util;
@@ -41,7 +42,10 @@ namespace UniDi
         Node _contextNode;
         bool _hasLookedUpContextNode;
 #endif
-
+        public override string ToString()
+        {
+            return $"DiContainer({_contextNode?.Name})";
+        }
 #if !NOT_UNITY3D
         Transform _contextTransform;
         bool _hasLookedUpContextTransform;
@@ -63,6 +67,7 @@ namespace UniDi
         public DiContainer(
             IEnumerable<DiContainer> parentContainersEnumerable, bool isValidating)
         {
+            GD.Print($"DiContainer.Constractor({ListPrinter.ToString(parentContainersEnumerable)})");
             _isValidating = isValidating;
 
             _lazyInjector = new LazyInstanceInjector(this);
@@ -237,7 +242,7 @@ namespace UniDi
                 {
                     _hasLookedUpContextNode = true;
 
-                    var context = TryResolve<NodeContextBase>(); // TODO: should be context (inherit?)
+                    var context = TryResolve<ContextNode>();
 
                     if (context != null)
                     {

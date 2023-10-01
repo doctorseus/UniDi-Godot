@@ -3,16 +3,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DevLabs.Collections;
 using Godot;
 using UniDi.Internal;
 
 namespace UniDi
 {
-    public abstract partial class NodeContextBase : Node
+    public abstract partial class ContextNode : Node
     {
-        [Export] public NodeInstaller Installer;
+        [Export] public InstallerNode Installer;
 
-        NodeKernel _kernel;
+        KernelNode _kernel;
 
         DiContainer _container;
 
@@ -21,7 +22,8 @@ namespace UniDi
         public event Action PreResolve;
         public event Action PostResolve;
 
-        protected DiContainer _parentContainer;
+        //[Inject(Optional = true)]
+        protected internal DiContainer _parentContainer;
 
         bool _hasInstalled;
 
@@ -42,16 +44,19 @@ namespace UniDi
         public override void _Ready()
         {
             GD.Print("SceneContext > _Ready");
+            var nodeKernel = _container.Resolve<KernelNode>();
+            GD.Print(" nodeKernel = " + nodeKernel);
+            nodeKernel.RunInitialize();
         }
 
         protected void RunInternal()
         {
-            GD.Print("> RunInternal");
+            GD.Print($"> RunInternal ParentInject={_parentContainer}");
 
             var parents = GetParentContainers();
             Assert.That(!parents.IsEmpty());
             Assert.That(parents.All(x => x.IsValidating == parents.First().IsValidating));
-
+            GD.Print($"> [{Name}] Parent={ListPrinter.ToString(parents)}");
             _parentContainer = new DiContainer(parents, parents.First().IsValidating);
 
             Install(_parentContainer);
@@ -80,7 +85,7 @@ namespace UniDi
             _hasInstalled = true;
 
             Assert.IsNull(_container);
-            GD.Print("_container = parentContainer.CreateSubContainer();");
+            GD.Print($"_container = parentContainer.CreateSubContainer(); {this.Name}");
             _container = parentContainer.CreateSubContainer();
             GD.Print($"-_container = {_container}");
             GD.Print($"-Container = {Container}");
@@ -160,21 +165,23 @@ namespace UniDi
 
         void InstallBindings(List<Node> injectableNodes)
         {
+            Container.Bind<UniDiSceneLoader>().AsSingle();
+
             GD.Print("> InstallBindings 1");
             // _container.DefaultParent = transform;
             // _container.Bind<Context>().FromInstance(this);
-            _container.Bind<NodeContextBase>().FromInstance(this);
+            _container.Bind<ContextNode>().FromInstance(this);
             GD.Print("> InstallBindings 2");
             if (_kernel == null)
             {            GD.Print("> InstallBindings 31");
-                _container.Bind<NodeKernel>()
-                    .To<DefaultNodeKernel>().OnNewNode().AsSingle().NonLazy();
+                _container.Bind<KernelNode>()
+                    .To<DefaultKernelNode>().OnNewNode().AsSingle().NonLazy();
                 GD.Print("> InstallBindings 32");
             }
             else
             {
                 GD.Print("> InstallBindings 41");
-                _container.Bind<NodeKernel>().FromInstance(_kernel).AsSingle().NonLazy();
+                _container.Bind<KernelNode>().FromInstance(_kernel).AsSingle().NonLazy();
                 GD.Print("> InstallBindings 42");
             }
             GD.Print("> InstallBindings 5");
@@ -187,7 +194,7 @@ namespace UniDi
         {
             if (Installer == null) return;
 
-            Assert.DerivesFrom<NodeInstallerBase>(Installer.GetType());
+            Assert.DerivesFrom<InstallerNodeBase>(Installer.GetType());
             _container.Inject(Installer);
             Installer.InstallBindings();
         }
