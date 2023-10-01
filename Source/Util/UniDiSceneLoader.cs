@@ -7,7 +7,7 @@ namespace UniDi
     public class UniDiSceneLoader
     {
         //readonly ProjectKernel _projectKernel;
-        readonly DiContainer _sceneContainer;
+        readonly ContextNode _sceneRoot;
 
         public UniDiSceneLoader(
             [Inject]
@@ -16,7 +16,7 @@ namespace UniDi
         {
             /*_projectKernel = projectKernel;*/
             GD.Print("###### UniDiSceneLoader> " + sceneRoot.Name);
-            _sceneContainer = sceneRoot.Container;
+            _sceneRoot = sceneRoot;
 
         }
 
@@ -26,14 +26,14 @@ namespace UniDi
             Action<DiContainer> extraBindings = null,
             Action<DiContainer> extraBindingsLate = null)
         {
-            var baseNode = _sceneContainer.ContextNode;
+            //var baseNode = _sceneContainer.ContextNode;
             var resource = ResourceLoader.Load<PackedScene>(sceneFile);
             var sceneNode = (SceneContextNode) resource.Instantiate();
-            sceneNode._parentContainer = _sceneContainer;
-            baseNode.AddChild(sceneNode);
+            sceneNode._parentContainer = _sceneRoot.Container;
+            _sceneRoot.AddChild(sceneNode);
             //baseNode.CallDeferred("add_child", sceneNode);
 
-            GD.Print($"UniDiSceneLoader > baseNode = {baseNode}");
+            //GD.Print($"UniDiSceneLoader > baseNode = {baseNode}");
             GD.Print($"UniDiSceneLoader > resource = {resource}");
             GD.Print($"UniDiSceneLoader > sceneNode = {sceneNode}");
 

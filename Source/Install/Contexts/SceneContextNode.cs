@@ -22,26 +22,22 @@ namespace UniDi
             base._Ready();
         }
 
-        protected override IEnumerable<DiContainer> GetParentContainers()
+        protected override DiContainer GetParentContainer()
         {
-            if (this._parentContainer == null)
-            {
-                // Check if we have an AutoloadContext instance available
-                // otherwise we use the StaticContext as parent (if no parent is given).
+            if (_parentContainer != null)
+                return _parentContainer;
+            // Check if we have an ProjectContextNode instance available
+            // otherwise we use the StaticContext as parent (if no parent is already given).
 
-                if (ProjectContextNode.Instance != null)
-                {
-                    return new[] { ProjectContextNode.Instance.Container };
-                }
-                else
-                {
-                    return new[] { StaticContext.Container };
-                }
+            if (ProjectContextNode.Instance != null)
+            {
+                return ProjectContextNode.Instance.Container;
             }
             else
             {
-                return new[] { _parentContainer };
+                return StaticContext.Container;
             }
+
         }
 
         protected override void InstallInternal()

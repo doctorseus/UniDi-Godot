@@ -15,6 +15,11 @@ namespace UniDi
 
         protected bool _hasInitialized;
 
+        public bool HasInitialized
+        {
+            get { return _hasInitialized; }
+        }
+
         [Inject]
         public InitializableManager(
             [Inject(Optional = true, Source = InjectSources.Local)]
@@ -23,7 +28,7 @@ namespace UniDi
             List<ValuePair<Type, int>> priorities)
         {
             _initializables = new List<InitializableInfo>();
-            GD.Print("InitializableManager > " + initializables.Count);
+            //GD.Print("InitializableManager > " + initializables.Count);
             for (int i = 0; i < initializables.Count; i++)
             {
                 var initializable = initializables[i];
@@ -75,7 +80,7 @@ namespace UniDi
                     using (ProfileBlock.Start("{0}.Initialize()", initializable.Initializable.GetType()))
 #endif
                     {
-                        GD.Print("InitializableManager > Initialize > " + initializable);
+                        GD.Print($"InitializableManager > Initialize({initializable.Initializable.GetType()} P={initializable.Priority})");
                         initializable.Initializable.Initialize();
                     }
                 }

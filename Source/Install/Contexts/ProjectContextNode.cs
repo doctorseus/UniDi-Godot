@@ -46,10 +46,7 @@ public partial class ProjectContextNode : ContextNode
         RunInternal();
     }
 
-    protected override IEnumerable<DiContainer> GetParentContainers()
-    {
-        return new[] { StaticContext.Container };
-    }
+    protected override DiContainer GetParentContainer() => StaticContext.Container;
 
     protected override void InstallInternal()
     {

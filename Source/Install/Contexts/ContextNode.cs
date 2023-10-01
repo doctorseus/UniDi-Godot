@@ -22,7 +22,7 @@ namespace UniDi
         public event Action PreResolve;
         public event Action PostResolve;
 
-        //[Inject(Optional = true)]
+        [Inject(Optional = true)]
         protected internal DiContainer _parentContainer;
 
         bool _hasInstalled;
@@ -41,32 +41,67 @@ namespace UniDi
             RunInternal();
         }
 
+        private class InitKernelCallback : IInitializable
+        {
+            private readonly KernelNode _kernel;
+
+            public InitKernelCallback(KernelNode kernel)
+            {
+                this._kernel = kernel;
+            }
+
+            public void Initialize()
+            {
+                this._kernel.RunInitialize();
+            }
+        }
+
         public override void _Ready()
         {
-            GD.Print("SceneContext > _Ready");
+            GD.Print($"SceneContext({Name}) > _Ready");
             var nodeKernel = _container.Resolve<KernelNode>();
             GD.Print(" nodeKernel = " + nodeKernel);
-            nodeKernel.RunInitialize();
+
+            // Only if we have a parent we could get an InitializableManager.
+            // We don't really have to care about a ProjectContextNode, its _ready() will always be fired before
+            // the main scene _ready().
+            if (_parentContainer != null)
+            {
+                var parentManager = _parentContainer.Resolve<InitializableManager>();
+
+                // If we have a parent InitializableManager we check if it already fired
+                // - If not, we register ourselves as the very last to initialize. This will ensure that upper level
+                //   scenes will come first in the initialization order.
+                // - If yes, we might be a scene which was loaded at a later point so we immediately run.
+                if (parentManager is { HasInitialized: false })
+                {
+                    parentManager.Add(new InitKernelCallback(nodeKernel), Int32.MaxValue);
+                }
+                else
+                {
+                    nodeKernel.RunInitialize();
+                }
+            }
+            else
+            {
+                nodeKernel.RunInitialize();
+            }
+
         }
 
         protected void RunInternal()
         {
             GD.Print($"> RunInternal ParentInject={_parentContainer}");
 
-            var parents = GetParentContainers();
-            Assert.That(!parents.IsEmpty());
-            Assert.That(parents.All(x => x.IsValidating == parents.First().IsValidating));
-            GD.Print($"> [{Name}] Parent={ListPrinter.ToString(parents)}");
-            _parentContainer = new DiContainer(parents, parents.First().IsValidating);
-
-            Install(_parentContainer);
+            var parentContainer = GetParentContainer();
+            Install(parentContainer);
 
             InstallInternal();
 
             ResolveAndStart();
         }
 
-        protected abstract IEnumerable<DiContainer> GetParentContainers();
+        protected abstract DiContainer GetParentContainer();
 
         protected abstract void InstallInternal();
 
@@ -175,7 +210,10 @@ namespace UniDi
             if (_kernel == null)
             {            GD.Print("> InstallBindings 31");
                 _container.Bind<KernelNode>()
-                    .To<DefaultKernelNode>().OnNewNode().AsSingle().NonLazy();
+                    .To<DefaultKernelNode>().OnNewNode().AsSingle().OnInstantiated((context, o) =>
+                    {
+                        _kernel = (KernelNode) o;
+                    }).NonLazy();
                 GD.Print("> InstallBindings 32");
             }
             else
