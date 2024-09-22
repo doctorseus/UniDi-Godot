@@ -1923,7 +1923,7 @@ namespace UniDi
 #endif
 
 #if GODOT
-        public Node CreateEmptyNodeOfType(NodeCreationParameters nodeBindInfo, Type nodeType, InjectContext context)
+        public Node CreateNodeOfType(NodeCreationParameters nodeBindInfo, Type nodeType, InjectContext context)
         {
             Assert.That(!AssertOnNewGameObjects, // TODO: check what goes here
                 "Given DiContainer does not support creating new game objects");
@@ -1937,6 +1937,9 @@ namespace UniDi
             if (parent == null)
             {
                 ContextNode.AddChild(node);
+                if (nodeBindInfo.Order == NodeCreationParameters.NodeOrder.First)
+                    ContextNode.MoveChild(node, 0);
+                //ContextNode.CallDeferred("add_child", node);
             }
             else
             {
@@ -2054,6 +2057,46 @@ namespace UniDi
             return InstantiateExplicit(
                 concreteType, InjectUtil.CreateArgList(extraArgs));
         }
+
+#if GODOT
+        public TContract InstantiateNode<TContract>(IEnumerable<object> extraArgs)
+            where TContract : Node
+        {
+            return (TContract)InstantiateNodeExplicit(typeof(TContract), InjectUtil.CreateArgList(extraArgs));
+        }
+
+        public T InstantiateNode<T>()
+            where T : Node
+        {
+            return InstantiateNode<T>(typeof(T).Name);
+        }
+
+        public T InstantiateNode<T>(string nodeName)
+            where T : Node
+        {
+            return InstantiateNode<T>(nodeName, new object[0]);
+        }
+
+        public T InstantiateNode<T>(
+            string nodeName, IEnumerable<object> extraArgs)
+            where T : Node
+        {
+            var node = InstantiateNode<T>(extraArgs);
+            node.Name = nodeName;
+            return node;
+        }
+
+        public Node InstantiateNodeExplicit(Type nodeType, List<TypeValuePair> extraArgs)
+        {
+            Assert.That(nodeType.DerivesFrom<Node>());
+
+            FlushBindings();
+
+            var node = (Node) Activator.CreateInstance(nodeType);
+            InjectExplicit(node, extraArgs);
+            return node;
+        }
+#endif
 
 #if !NOT_UNITY3D
         // Add new component to existing game object and fill in its dependencies

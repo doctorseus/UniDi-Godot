@@ -7,6 +7,12 @@ namespace UniDi
     [NoReflectionBaking]
     public class NodeCreationParameters
     {
+        public enum NodeOrder
+        {
+            Last,
+            First
+        }
+
         public string Name
         {
             get;
@@ -20,6 +26,12 @@ namespace UniDi
         }
 
         public Node ParentNode
+        {
+            get;
+            set;
+        }
+
+        public NodeOrder Order
         {
             get;
             set;

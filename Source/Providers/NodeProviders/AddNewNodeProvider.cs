@@ -32,7 +32,7 @@ namespace UniDi
                 _nodeBindInfo.Name = NodeType.Name;
             }
 
-            return Container.CreateEmptyNodeOfType(_nodeBindInfo, nodeType, context);
+            return Container.CreateNodeOfType(_nodeBindInfo, nodeType, context);
         }
     }
 }
