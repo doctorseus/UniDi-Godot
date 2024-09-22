@@ -31,10 +31,12 @@ namespace UniDi
 
             if (ProjectContextNode.Instance != null)
             {
+                GD.Print($"{Name} > GetParentContainer = ProjectContextNode.Instance.Container = {ProjectContextNode.Instance.Container}");
                 return ProjectContextNode.Instance.Container;
             }
             else
             {
+                GD.Print($"{Name} > GetParentContainer = StaticContext.Container = {StaticContext.Container}");
                 return StaticContext.Container;
             }
 

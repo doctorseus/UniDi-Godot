@@ -120,7 +120,7 @@ namespace UniDi
             _hasInstalled = true;
 
             Assert.IsNull(_container);
-            GD.Print($"_container = parentContainer.CreateSubContainer(); {this.Name}");
+            GD.Print($"_container = parentContainer.CreateSubContainer(); {Name}");
             _container = parentContainer.CreateSubContainer();
             GD.Print($"-_container = {_container}");
             GD.Print($"-Container = {Container}");

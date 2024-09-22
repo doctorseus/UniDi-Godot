@@ -217,6 +217,7 @@ namespace UniDi
 
         bool ShouldInheritBinding(BindStatement binding, DiContainer ancestorContainer)
         {
+            GD.Print($"Inherit {ancestorContainer._contextNode?.Name} > {_contextNode?.Name} Method={binding.SpawnBindInfo()}");
             if (binding.BindingInheritanceMethod == BindingInheritanceMethods.CopyIntoAll
                 || binding.BindingInheritanceMethod == BindingInheritanceMethods.MoveIntoAll)
             {

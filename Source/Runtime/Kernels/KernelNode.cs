@@ -52,7 +52,7 @@ namespace UniDi
                 }
                 else
                 {
-                    GD.Print(">>>> _initializableManager.Initialize()");
+                    GD.Print($">>>> _initializableManager.Initialize(with={_initializableManager})");
                     _initializableManager.Initialize();
                 }
             }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using DevLabs.Collections;
 using UniDi.Internal;
 
 namespace UniDi
@@ -73,6 +74,11 @@ namespace UniDi
         public void SetContextInfo(string contextInfo)
         {
             ContextInfo = contextInfo;
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(MarkAsCreationBinding)}: {MarkAsCreationBinding}, {nameof(MarkAsUniqueSingleton)}: {MarkAsUniqueSingleton}, {nameof(ConcreteIdentifier)}: {ConcreteIdentifier}, {nameof(SaveProvider)}: {SaveProvider}, {nameof(OnlyBindIfNotBound)}: {OnlyBindIfNotBound}, {nameof(RequireExplicitScope)}: {RequireExplicitScope}, {nameof(Identifier)}: {Identifier}, {nameof(ContractTypes)}: {ListPrinter.ToString(ContractTypes)}, {nameof(BindingInheritanceMethod)}: {BindingInheritanceMethod}, {nameof(InvalidBindResponse)}: {InvalidBindResponse}, {nameof(NonLazy)}: {NonLazy}, {nameof(Condition)}: {Condition}, {nameof(ToChoice)}: {ToChoice}, {nameof(ContextInfo)}: {ContextInfo}, {nameof(ToTypes)}: {ListPrinter.ToString(ToTypes)}, {nameof(Scope)}: {Scope}, {nameof(Arguments)}: {Arguments}, {nameof(InstantiatedCallback)}: {InstantiatedCallback}";
         }
 
         public void Reset()

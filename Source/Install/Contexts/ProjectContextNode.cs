@@ -52,7 +52,7 @@ public partial class ProjectContextNode : ContextNode
     {
         // TODO: this is done by project context normally (we need some toplevel context)
         // InitializableManager, TickableManager, DisposableManager
-        GD.Print($"Container={Container}");
+        GD.Print($"ProjectContextNode > Container={Container}");
 
         UniDiManagersInstaller.Install(Container);
     }
