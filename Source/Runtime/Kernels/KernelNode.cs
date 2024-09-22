@@ -61,6 +61,8 @@ namespace UniDi
         public override void _Process(double delta)
         {
             Update();
+            //LateUpdate();
+            CallDeferred("LateUpdate");
         }
 
         public virtual void Update()
