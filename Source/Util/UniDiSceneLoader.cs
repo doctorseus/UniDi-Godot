@@ -15,7 +15,7 @@ namespace UniDi
 //            ProjectKernel projectKernel)
         {
             /*_projectKernel = projectKernel;*/
-
+            GD.Print("###### UniDiSceneLoader> " + sceneRoot.Name);
             _sceneRoot = sceneRoot;
 
         }
@@ -32,6 +32,15 @@ namespace UniDi
             sceneNode._parentContainer = _sceneRoot.Container;
             _sceneRoot.AddChild(sceneNode);
             //baseNode.CallDeferred("add_child", sceneNode);
+
+            //GD.Print($"UniDiSceneLoader > baseNode = {baseNode}");
+            GD.Print($"UniDiSceneLoader > resource = {resource}");
+            GD.Print($"UniDiSceneLoader > sceneNode = {sceneNode}");
+
+            GD.Print($"UniDiSceneLoader > ResourceLoader.ResourceName = {resource.ResourceName}");
+            GD.Print($"UniDiSceneLoader > ResourceLoader.ResourcePath = {resource.ResourcePath}");
+            GD.Print($"UniDiSceneLoader > ResourceLoader.ResourceLocalToScene = {resource.ResourceLocalToScene}");
+
         }
     }
 }

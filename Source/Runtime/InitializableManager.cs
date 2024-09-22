@@ -28,7 +28,7 @@ namespace UniDi
             List<ValuePair<Type, int>> priorities)
         {
             _initializables = new List<InitializableInfo>();
-
+            //GD.Print("InitializableManager > " + initializables.Count);
             for (int i = 0; i < initializables.Count; i++)
             {
                 var initializable = initializables[i];
@@ -56,6 +56,7 @@ namespace UniDi
 
         public void Initialize()
         {
+            GD.Print("InitializableManager > Initialize");
             Assert.That(!_hasInitialized);
             _hasInitialized = true;
 
@@ -79,6 +80,7 @@ namespace UniDi
                     using (ProfileBlock.Start("{0}.Initialize()", initializable.Initializable.GetType()))
 #endif
                     {
+                        GD.Print($"InitializableManager > Initialize({initializable.Initializable.GetType()} P={initializable.Priority})");
                         initializable.Initializable.Initialize();
                     }
                 }

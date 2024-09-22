@@ -40,6 +40,7 @@ namespace UniDi
 
         public void Initialize()
         {
+            GD.Print(">>>> Initialize " + GetParent().Name);
             // We don't put this in start in case Start is overridden
             if (!_hasInitialized)
             {
@@ -51,6 +52,7 @@ namespace UniDi
                 }
                 else
                 {
+                    GD.Print($">>>> _initializableManager.Initialize(with={_initializableManager})");
                     _initializableManager.Initialize();
                 }
             }

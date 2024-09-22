@@ -67,6 +67,7 @@ namespace UniDi
         public DiContainer(
             IEnumerable<DiContainer> parentContainersEnumerable, bool isValidating)
         {
+            GD.Print($"DiContainer.Constractor({ListPrinter.ToString(parentContainersEnumerable)})");
             _isValidating = isValidating;
 
             _lazyInjector = new LazyInstanceInjector(this);
@@ -216,6 +217,7 @@ namespace UniDi
 
         bool ShouldInheritBinding(BindStatement binding, DiContainer ancestorContainer)
         {
+            GD.Print($"Inherit {ancestorContainer._contextNode?.Name} > {_contextNode?.Name} Method={binding.SpawnBindInfo()}");
             if (binding.BindingInheritanceMethod == BindingInheritanceMethods.CopyIntoAll
                 || binding.BindingInheritanceMethod == BindingInheritanceMethods.MoveIntoAll)
             {
@@ -491,6 +493,7 @@ namespace UniDi
 
         public void QueueForInject(object instance)
         {
+            GD.Print($"Inject ({instance}) [{((Node)instance).Name}]");
             _lazyInjector.AddInstance(instance);
         }
 

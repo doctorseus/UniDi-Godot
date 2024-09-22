@@ -34,6 +34,10 @@ namespace UniDi
 
         public override void _EnterTree()
         {
+            GD.Print("SceneContext > _EnterTree");
+
+
+
             RunInternal();
         }
 
@@ -54,7 +58,9 @@ namespace UniDi
 
         public override void _Ready()
         {
+            GD.Print($"SceneContext({Name}) > _Ready");
             var nodeKernel = _container.Resolve<KernelNode>();
+            GD.Print(" nodeKernel = " + nodeKernel);
 
             // Only if we have a parent we could get an InitializableManager.
             // We don't really have to care about a ProjectContextNode, its _ready() will always be fired before
@@ -85,6 +91,8 @@ namespace UniDi
 
         protected void RunInternal()
         {
+            GD.Print($"> RunInternal ParentInject={_parentContainer}");
+
             var parentContainer = GetParentContainer();
             Install(parentContainer);
 
@@ -99,6 +107,7 @@ namespace UniDi
 
         public void Install(DiContainer parentContainer)
         {
+            GD.Print("> Install");
             Assert.That(_parentContainer == null || _parentContainer == parentContainer);
 
             // We allow calling this explicitly instead of relying on the [Inject] event above
@@ -111,7 +120,10 @@ namespace UniDi
             _hasInstalled = true;
 
             Assert.IsNull(_container);
+            GD.Print($"_container = parentContainer.CreateSubContainer(); {Name}");
             _container = parentContainer.CreateSubContainer();
+            GD.Print($"-_container = {_container}");
+            GD.Print($"-Container = {Container}");
 
             // Do this after creating DiContainer in case it's needed by the pre install logic
             if (PreInstall != null)
@@ -135,24 +147,25 @@ namespace UniDi
             }
 
             _container.IsInstalling = true;
-
+            GD.Print("> Install 2");
             try
-            {
-                InstallBindings(injectableNodes);
+            {            GD.Print("> Install 3");
+                InstallBindings(injectableNodes);            GD.Print("> Install 4");
             }
             finally
             {
                 _container.IsInstalling = false;
             }
-
+            GD.Print("> Install 5");
             if (PostInstall != null)
             {
                 PostInstall();
-            }
+            }            GD.Print("> Install 6");
         }
 
         void ResolveAndStart()
         {
+            GD.Print("> ResolveAndStart");
             if (PreResolve != null)
             {
                 PreResolve();
@@ -179,6 +192,7 @@ namespace UniDi
             // {
             //     _kernel = _container.Resolve<NodeKernel>();
             //     _kernel.Initialize();
+            //     GD.Print("> NodeKernel>Initialize()");
             // }
         }
 
@@ -188,25 +202,30 @@ namespace UniDi
         {
             Container.Bind<UniDiSceneLoader>().AsSingle();
 
+            GD.Print("> InstallBindings 1");
             // _container.DefaultParent = transform;
             // _container.Bind<Context>().FromInstance(this);
             _container.Bind<ContextNode>().FromInstance(this);
-
+            GD.Print("> InstallBindings 2");
             if (_kernel == null)
-            {
+            {            GD.Print("> InstallBindings 31");
                 _container.Bind<KernelNode>()
                     .To<DefaultKernelNode>().OnNewNode().AsSingle().OnInstantiated((context, o) =>
                     {
                         _kernel = (KernelNode) o;
                     }).NonLazy();
+                GD.Print("> InstallBindings 32");
             }
             else
             {
+                GD.Print("> InstallBindings 41");
                 _container.Bind<KernelNode>().FromInstance(_kernel).AsSingle().NonLazy();
+                GD.Print("> InstallBindings 42");
             }
-
+            GD.Print("> InstallBindings 5");
             // InstallSceneBindings(injectableMonoBehaviours);
             InstallInstallers();
+            GD.Print("> InstallBindings 6");
         }
 
         void InstallInstallers()
@@ -219,10 +238,14 @@ namespace UniDi
         }
 
         public override void _ExitTree()
-        { }
+        {
+            GD.Print("GameController> Dispose(_ExitTree)");
+        }
 
         protected override void Dispose(bool disposing)
-        { }
+        {
+            GD.Print("GameController> Dispose(" + disposing + ")");
+        }
 
     }
 }

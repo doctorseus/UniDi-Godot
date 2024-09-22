@@ -29,11 +29,13 @@ public partial class ProjectContextNode : ContextNode
 
     public override void _EnterTree()
     {
+        GD.Print("AutoloadContext > _EnterTree");
         SetSingletonAndInitialize();
     }
 
     public override void _Ready()
     {
+        GD.Print("AutoloadContext > _Ready");
         base._Ready();
     }
 
@@ -50,6 +52,7 @@ public partial class ProjectContextNode : ContextNode
     {
         // TODO: this is done by project context normally (we need some toplevel context)
         // InitializableManager, TickableManager, DisposableManager
+        GD.Print($"ProjectContextNode > Container={Container}");
 
         UniDiManagersInstaller.Install(Container);
     }

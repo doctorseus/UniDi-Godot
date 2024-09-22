@@ -11,11 +11,14 @@ namespace UniDi
 
         public override void _EnterTree()
         {
+            GD.Print($"NodeContext > _EnterTree ({Name})");
+
             RunInternal();
         }
 
         public override void _Ready()
         {
+            GD.Print("NodeContext > _Ready");
             base._Ready();
         }
 
@@ -28,10 +31,12 @@ namespace UniDi
 
             if (ProjectContextNode.Instance != null)
             {
+                GD.Print($"{Name} > GetParentContainer = ProjectContextNode.Instance.Container = {ProjectContextNode.Instance.Container}");
                 return ProjectContextNode.Instance.Container;
             }
             else
             {
+                GD.Print($"{Name} > GetParentContainer = StaticContext.Container = {StaticContext.Container}");
                 return StaticContext.Container;
             }
 
@@ -70,6 +75,7 @@ namespace UniDi
             {
                 return;
             }
+            GD.Print($"##> Add for injection {node.Name}[{node.GetType()}]");
 
             if (node.GetType().DerivesFromOrEqual<SceneContextNode>())
             {
@@ -86,6 +92,7 @@ namespace UniDi
                 // because it should always inject in the dependency order
                 foreach (var child in node.GetChildren())
                 {
+                    GD.Print($"> child=({child})");
                     GetInjectableDescendantNodesInternal(child, injectableNodes);
                 }
 
